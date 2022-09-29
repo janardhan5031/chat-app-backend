@@ -25,7 +25,7 @@ exports.sign_up = (req,res,next)=>{
                         // storing the user data after successful hashing of password
                         Users.create({name,email,number,password:hashed_pswd})
                         .then((result)=>{
-                            console.log(result);
+                            //console.log(result);
                             res.status(201).json({msg:'successfully created ur account. pls login'})
                         })
                     }))
@@ -57,12 +57,12 @@ exports.sign_in = (req,res,next)=>{
                     //console.log(membership)
                     res.status(200).json({token:token,membership:membership,success:true,msg:'successfully logged in'});
                 }else{
-                    res.status(203).json({success:false,msg:'password do not matched'})
+                    res.status(203).json({success:false,msg:'user not authorized'})
                 }
             })
         }else{
             
-            res.status(203).json({msg:'you are not a member to sign in. pls sign up'})
+            res.status(203).json({msg:'User not found. pls sign up'})
         }
     })
     .catch(err =>console.log(err));
