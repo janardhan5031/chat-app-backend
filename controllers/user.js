@@ -52,10 +52,8 @@ exports.sign_in = (req,res,next)=>{
                     // if password is mactched, create new token for this user and send it
 
                     const token = jwt.sign(user[0].id,process.env.SECRETE_KEY);
-
-                    const membership = user[0].isPremiumUser;
-                    //console.log(membership)
-                    res.status(200).json({token:token,membership:membership,success:true,msg:'successfully logged in'});
+                   
+                    res.status(200).json({token:token,data:{id:user[0].id,name:user[0].name},msg:'successfully logged in'});
                 }else{
                     res.status(203).json({success:false,msg:'user not authorized'})
                 }
@@ -67,3 +65,11 @@ exports.sign_in = (req,res,next)=>{
     })
     .catch(err =>console.log(err));
 } 
+
+exports.getAllUsers = (req,res,next) =>{
+    Users.findAll()
+    .then(users=>{
+        res.status(201).send(users);
+    })
+    .catch(err => console.log(err));
+}

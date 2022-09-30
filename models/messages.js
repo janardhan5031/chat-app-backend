@@ -8,7 +8,8 @@ const messages = database.define('message',{
         autoIncrement:true,
         primaryKey:true
     },
-    msg:sequelize.STRING
+    msg:sequelize.STRING,
+    send_to:sequelize.STRING
 })
 
 module.exports = messages;
