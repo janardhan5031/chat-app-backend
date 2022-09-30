@@ -1,3 +1,4 @@
+const { json } = require('body-parser');
 const { NUMBER,Op } = require('sequelize');
 const Messages = require('../models/messages');
 
@@ -22,14 +23,24 @@ exports.sendMessage = (req,res,next)=>{
 // get all messages stored in db
 exports.getAll =(req,res,next)=>{
     const send_to= req.query.send_to;
-    console.log(req.user.id+' -> '+send_to);
+    const last_msg_id = req.query.last_msg_id;
+    //console.log(req.user.id+' -> '+send_to);  
+    console.log('=====',last_msg_id)
+
+    if(last_msg_id === 'undefined'){
+        return res.status(203).json({msg:'no messages are there in database'})
+    }
 
     Messages.findAll({where:{
         // filtering the messages with userId:{1 or 2} and send_to:{1 or 2} exmple case
         // Op -> options we are instrecting to filter
         // Op.in -> shorthand 'OR' operation in sequelize
+        // Op.gte -> greater than conditional operation
+        id:{ [ Op.gt ]:[ last_msg_id ] },
         userId:{ [ Op.in ]:[ req.user.id , send_to ]},
         send_to:{ [ Op.in ]:[ req.user.id , send_to ]}
+
+
     }})
     .then((messages)=>{
         if(messages.length>0){
