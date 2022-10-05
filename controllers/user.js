@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const Users= require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -67,7 +69,9 @@ exports.sign_in = (req,res,next)=>{
 } 
 
 exports.getAllUsers = (req,res,next) =>{
-    Users.findAll()
+    Users.findAll( { where: { 
+        id:{ [Op.notIn] : [req.user.id]}
+    }})
     .then(users=>{
         res.status(201).send(users);
     })

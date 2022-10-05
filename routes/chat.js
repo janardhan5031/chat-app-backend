@@ -1,12 +1,16 @@
 const express  = require('express');
-const route = express.Router();
+const router = express.Router();
 
 const auth = require('../controllers/authentication');
 const chatControll =require('../controllers/chatControll');
-const router = require('./user');
 
-route.post('/send',auth.authenticate,chatControll.sendMessage);
 
-route.get('/get-all',auth.authenticate,chatControll.getAll);
+router.post('/send',auth.authenticate,chatControll.sendMessage);
 
-module.exports = route;
+router.get('/get-all',auth.authenticate,chatControll.getAll);
+
+router.post('/send-to-grp',auth.authenticate, chatControll.postGrpChat)
+
+router.get('/get-grp-msgs',auth.authenticate, chatControll.getGrpMsgs);
+
+module.exports = router;

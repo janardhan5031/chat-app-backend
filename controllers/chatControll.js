@@ -1,6 +1,7 @@
 const { json } = require('body-parser');
 const { NUMBER,Op } = require('sequelize');
 const Messages = require('../models/messages');
+const Group = require('../models/group');
 
 // storing the message sent to other person
 exports.sendMessage = (req,res,next)=>{
@@ -20,7 +21,7 @@ exports.sendMessage = (req,res,next)=>{
     }
 }
 
-// get all messages stored in db
+// get all one - one messages stored in db
 exports.getAll =(req,res,next)=>{
     const send_to= req.query.send_to;
     const last_msg_id = req.query.last_msg_id;
@@ -51,4 +52,54 @@ exports.getAll =(req,res,next)=>{
         }
     })
     .catch(err =>console.log(err))
+}
+
+
+exports.postGrpChat = (req,res,next) =>{
+    const groupId = req.query.send_to;
+    const msg = req.body.msg;
+
+    try{
+        req.user.createMessage({msg,groupId})
+        .then(new_msg=>{
+            //console.log(new_msg)
+            res.status(201).send(new_msg);
+        })
+        .catch(err => console.log(err));
+    }catch(err){
+        console.log(err);
+    }
+}
+
+
+exports.getGrpMsgs =(req,res,next)=>{
+    const groupId = req.query.send_to;
+    const last_msg_id = req.query.last_msg_id;
+    console.log('===== group msgs ===',last_msg_id)
+    
+    try{
+        req.user.getGroups({where:{id:groupId}})
+        .then(groups=>{
+            return groups[0].getMessages({ 
+                where:{ 
+                    groupId ,
+                    id:{ [Op.gt]: [ last_msg_id ] }
+                },
+                attributes:['id','msg','userId','groupId']
+            }) 
+        })
+        .then(groupMessages =>{
+            //console.log(groupMessages);
+            if(groupMessages.length>0){
+
+                res.status(201).send(groupMessages)
+            }else{
+                res.status(203).json({msg:'no messagesa are there in database'})
+            }
+        }) 
+        .catch(err => console.log(err))
+    }
+    catch(err){
+        console.log(err)
+    }
 }
