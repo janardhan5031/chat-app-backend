@@ -1,5 +1,11 @@
+
+const fs= require('fs');
+
 const { json } = require('body-parser');
 const { NUMBER,Op } = require('sequelize');
+const AWS = require('aws-sdk');
+
+
 const Messages = require('../models/messages');
 const Group = require('../models/group');
 
@@ -19,6 +25,32 @@ exports.sendMessage = (req,res,next)=>{
         })
         .catch(err => console.log(err));
     }
+}
+
+// sending files between users
+exports.sendFile = async (req,res,next)=>{   
+    const file = req.file;
+    console.log(file)
+
+    const imagePath = req.file.path;
+    const blob = fs.readFileSync(imagePath)
+
+    const s3 = new AWS.S3({
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    })
+
+    const uploadedImage = await s3.upload({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: req.file.filename,
+        Body: blob,
+        ACL:'public-read'
+    }).promise()
+
+    console.log(uploadedImage)
+
+    res.send('file uploaded successfully')
+
 }
 
 // get all one - one messages stored in db
