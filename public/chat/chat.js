@@ -25,7 +25,7 @@ function getAllUsers(){
     const token = localStorage.getItem('token');
     
     // calling backend to get all users 
-    axios.get(`http://localhost:5000/user/getAllUsers`,{headers:{"authorization":token}})
+    axios.get(`http://13.127.49.91:5000/user/getAllUsers`,{headers:{"authorization":token}})
     .then(async (result) =>{
         console.log(result);
 
@@ -66,7 +66,7 @@ async function getAllGroups(){
 
     console.log(' call backend for groups list')
 
-    axios.get(`http://localhost:5000/group/get-all`,{headers:{"authorization":token}})
+    axios.get(`http://13.127.49.91:5000/group/get-all`,{headers:{"authorization":token}})
     .then(result =>{
         if(result.status === 201){
             console.log(result)
@@ -229,7 +229,7 @@ async function getMsgsFromBackend(){
     const path = JSON.parse(localStorage.getItem('isgroup')) ? 'get-grp-msgs' : 'get-all' ;
 
     console.log(last_msg_id)
-    await axios.get(`http://localhost:5000/chat/${path}?send_to=${recieving_person_id}&last_msg_id=${last_msg_id}`,{headers:{"authorization":token}})
+    await axios.get(`http://13.127.49.91:5000/chat/${path}?send_to=${recieving_person_id}&last_msg_id=${last_msg_id}`,{headers:{"authorization":token}})
     .then(async(result)=>{
         
         console.log(result);
@@ -413,7 +413,7 @@ document.getElementById('send_btn').addEventListener('click',(e)=>{
         file.append('image',input_field.files[0]);
         
         console.log(file)
-        axios.post(`http://localhost:5000/${path}/file?send_to=${send_to}`,file,{headers:{"authorization":token}})
+        axios.post(`http://13.127.49.91:5000/${path}/file?send_to=${send_to}`,file,{headers:{"authorization":token}})
         .then(result =>{
             console.log(result)
         })
@@ -424,7 +424,7 @@ document.getElementById('send_btn').addEventListener('click',(e)=>{
     else if( input_field.type ==='text'){
         
         const msg = input_field.value;
-        axios.post(`http://localhost:5000/${path}?send_to=${send_to}`,{msg},{headers:{"authorization":token}})
+        axios.post(`http://13.127.49.91:5000/${path}?send_to=${send_to}`,{msg},{headers:{"authorization":token}})
         .then(result=>{
             console.log(result);
     
@@ -459,7 +459,7 @@ document.getElementById('add_group_name').addEventListener('click',(e) =>{
     const groupName= document.getElementById('add_group_value').value;
     console.log(groupName)
 
-    axios.post(`http://localhost:5000/group/create-group`,{groupName},{headers:{"authorization":token}})
+    axios.post(`http://13.127.49.91:5000/group/create-group`,{groupName},{headers:{"authorization":token}})
     .then(result=>{
         console.log(result);
 
@@ -509,7 +509,7 @@ async function get_group_members_from_backend(){
     const token = localStorage.getItem('token');
 
     // getting the all users of respective active group
-    axios.get(`http://localhost:5000/group/get-members?groupId=${groupId}`,{headers:{"authorization":token}})
+    axios.get(`http://13.127.49.91:5000/group/get-members?groupId=${groupId}`,{headers:{"authorization":token}})
     .then(result=>{
         console.log(result)
         if(result.status ===200){
@@ -716,7 +716,7 @@ async function update_group_in_backend(key, userId){
     const token = localStorage.getItem('token');
     const groupId = localStorage.getItem('send_to');
 
-    await axios.post(`http://localhost:5000/group/${key}`,{groupId,userId},{headers:{"authorization":token}})
+    await axios.post(`http://13.127.49.91:5000/group/${key}`,{groupId,userId},{headers:{"authorization":token}})
     .then((result)=>{
         //console.log(result)
         window.alert(result.data.msg)
