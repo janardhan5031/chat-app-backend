@@ -9,6 +9,7 @@ const messages = database.define('message',{
         primaryKey:true
     },
     msg:sequelize.STRING,
+    imgUrl:sequelize.STRING,
     send_to:sequelize.STRING
 })
 

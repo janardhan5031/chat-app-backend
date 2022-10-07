@@ -10,18 +10,13 @@ const chatControll =require('../controllers/chatControll');
 router.post('/send',auth.authenticate,chatControll.sendMessage);
 
 // sending file to another user
-const fileStorageEngine = multer.diskStorage({
-    destination:(req,file,cb)=>{
-        cb(null,"./images");
-    },
-    filename:(req,file,cb) =>{
-        cb(null,Date.now()+'--'+file.originalname);
-    }
-});
+const storage = multer.memoryStorage();   // slipts the incoming file/ files into chunks
 
-const upload = multer({storage:fileStorageEngine});
+const upload = multer({storage:storage});  // attaching the file to the req access along req life
 
-router.post('/send/file',upload.single('image'),chatControll.sendFile);
+router.post('/send/file',auth.authenticate , upload.single('image'),chatControll.sendFile);
+
+router.post('/send-to-grp/file',auth.authenticate, upload.single('image') , chatControll.sendFile_group)
 
 router.get('/get-all',auth.authenticate,chatControll.getAll);
 
