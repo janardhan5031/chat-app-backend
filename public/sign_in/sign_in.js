@@ -5,7 +5,7 @@ document.getElementById('signIn_btn').addEventListener('click',(e)=>{
     const password=document.getElementById('password_input').value;
 
     if(email && password){
-        axios.post('http://13.127.49.91:5000/user/sign_in',{email,password})
+        axios.post('http://13.127.49.91/user/sign_in',{email,password})
         .then(result=>{
             console.log(result)
             if(result.status===200){

@@ -15,7 +15,7 @@ document.getElementById('main_container').addEventListener('click',(e)=>{
         const password=document.getElementById('password_input').value;
 
         if(name && email && number && password){
-            axios.post('http://13.127.49.91:5000/user/sign_up',{name,email,number,password})
+            axios.post('http://13.127.49.91/user/sign_up',{name,email,number,password})
             .then((result)=>{
                 console.log(result);
                 if(result.status ===203){   // somehting went wrong with data
