@@ -69,7 +69,7 @@ exports.sign_in = (req,res,next)=>{
 } 
 
 exports.getAllUsers = (req,res,next) =>{
-    Users.findAll( { where: { 
+    Users.findAll( { attributes:['id','name']  ,where: { 
         id:{ [Op.notIn] : [req.user.id]}
     }})
     .then(users=>{

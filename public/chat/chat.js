@@ -115,24 +115,31 @@ function displayAllUsers(list){
 }
 
 // showing a particular person's convesation by click on him
-document.getElementById('members_table').addEventListener('click',(e)=>{
+document.getElementById('members_table').addEventListener('click',async (e)=>{
 
     //console.log(e.target.parentElement.parentElement.classList.contains('groupConversation'))
 
     // if the clicked element is group element, store group activation, id in LS
     if(e.target.parentElement.parentElement.classList.contains('groupConversation')){
-        const parent = e.target.parentElement.parentElement;
-        localStorage.setItem('isgroup',true);
-        localStorage.setItem('send_to',parent.id);
-        
-        conversaion_name = parent.children[1].children[0].innerText;
-        console.log(conversaion_name)
-        localStorage.setItem('contact_name',conversaion_name);
+        try{
 
-        display_user_details_in_chat_module(conversaion_name)
-
-
-        getConversation(parent.id);
+            const parent = e.target.parentElement.parentElement;
+            localStorage.setItem('isgroup',true);
+            localStorage.setItem('send_to',parent.id);
+            
+            conversaion_name = parent.children[1].children[0].innerText;
+            console.log(conversaion_name)
+            localStorage.setItem('contact_name',conversaion_name);
+    
+            await get_group_members_from_backend();
+    
+            await display_user_details_in_chat_module(conversaion_name)
+    
+    
+            await getConversation(parent.id);
+        }catch(err){
+            console.log(err)
+        }
     }else{
 
         const parent = e.target.parentElement.parentElement;
@@ -156,12 +163,24 @@ async function display_user_details_in_chat_module(conversaion_name){
    
     const parent = document.getElementById('contact_profile');
 
+
     const ele =`
     <div class="add_group_member" >
     <button type="button" id="group_controll">controlls</button>
     </div>`;
-
-    button = await JSON.parse(localStorage.getItem('isgroup')) ? ele : '';
+    const isgroup = JSON.parse(localStorage.getItem('isgroup'));
+    const curr_user_id = JSON.parse(localStorage.getItem('user_data')).id;
+    
+    let button='';
+    let isadmin;
+    if(isgroup){
+        JSON.parse(localStorage.getItem('group_members')).forEach(member =>{
+            if(member.userId === curr_user_id && member.isadmin ===true){
+                button = ele; 
+                isadmin=true;
+            }
+        })
+    }
 
     parent.innerHTML = `
     <div class="profile" id=" usr_id">
@@ -173,11 +192,9 @@ async function display_user_details_in_chat_module(conversaion_name){
             <p>last seed at</p>
         </div>
         ${button}
-    </div>`
-    if(JSON.parse(localStorage.getItem('isgroup'))){
+    </div>`;
 
-        await get_group_members_from_backend();
-
+    if(isgroup && isadmin){
         await group_controlls();
     }
 
@@ -346,10 +363,7 @@ async function displayingMessages(array){
             const contact_name= JSON.parse(localStorage.getItem('isgroup')) ? contact : localStorage.getItem('contact_name');
             console.log(contact_name)
             
-            let child_ele;
-            if(data.msg ==='jani'){
-                child_ele=``
-            }
+
 
             if(data.msg){
                 const ele =`    
@@ -504,12 +518,12 @@ function showing_group_in_interface(groupId,groupName){
 
 
 // getting active group members from backend
-async function get_group_members_from_backend(){
+async function  get_group_members_from_backend(){
     const groupId = localStorage.getItem('send_to');
     const token = localStorage.getItem('token');
 
     // getting the all users of respective active group
-    axios.get(`http://13.127.49.91/group/get-members?groupId=${groupId}`,{headers:{"authorization":token}})
+    await axios.get(`http://13.127.49.91/group/get-members?groupId=${groupId}`,{headers:{"authorization":token}})
     .then(result=>{
         console.log(result)
         if(result.status ===200){
@@ -522,7 +536,7 @@ async function get_group_members_from_backend(){
 
 }
 
-
+var key;
 // activating and de-activating add group member to group container
 async function group_controlls(){
 
@@ -554,11 +568,17 @@ async function group_controlls(){
             group_controll_icon.style.color = 'red'
 
         }
-
+        
+    
         // listening all events at admin controlls container 
         admin_controlls.addEventListener('click',async (e)=>{
 
-            let key;
+            if(key){
+                // removing event listener at this container
+                document.getElementById(`${key}_container`).removeEventListener('click', MyFunction)
+
+                document.getElementById(`${key}_container`).classList.remove('active');
+            }
             // if admin click on add button, the he can be able to add member to group by sowing the member in left container
             if(e.target.id ==='add_member') key ='add_new_member'
 
@@ -583,8 +603,9 @@ async function group_controlls(){
 
 // showing the memgers to add into the group
 async function show_members_in_left_container(key){
-    const container = document.getElementById('add_group_members_container');
-    container.innerHTML = '';
+    const container = document.getElementById(`${key}_container`);
+    container.classList.add('active');
+    container.innerHTML ='';
 
     //console.log('janiq')
 
@@ -632,7 +653,7 @@ async function show_members_in_left_container(key){
 
                     if(user.id === member.userId){
 
-                        return container.innerHTML += element(user.id, user.name);
+                        container.innerHTML += element(user.id, user.name);
                     }
                 })
             }
@@ -679,38 +700,42 @@ async function show_members_in_left_container(key){
 async function update_member_status_in_container(key){
 
     const main_container = document.getElementById('add_group_members_container');
+    
+    main_container.addEventListener('click',MyFunction)
 
-    main_container.addEventListener('click',async (e)=>{
-
-        //console.log('jani')
-        e.preventDefault();
-
-        //console.log(e.target.parentElement.parentElement.parentElement.children[2].children[0])
-        const event = e.target.parentElement.parentElement;
-        let parent;
-        let check;
-        if(event.parentElement.className ==='group_member_ele'){
-            parent =event.parentElement;
-            check = event.parentElement.children[2].children[0];
-          
-        }else if(event.className === 'group_member_ele'){
-            parent=event;
-            check = event.children[2].children[0];
-        }
-        check.checked = true;
-        check.parentElement.parentElement.children[1].children[0].innerText +=' is added'
-        console.log(check.checked)
-        setTimeout(()=>{
-            check.disabled =true
-            parent.style.transform ='translatex(150%)'  
-        },3000)
-        
-           
-        await update_group_in_backend(key,check.id)
-        
-    })
 
 }
+
+async function MyFunction(e){
+    //console.log('jani')
+    e.preventDefault();
+
+    //console.log(e.target.parentElement.parentElement.parentElement.children[2].children[0])
+    const event = e.target.parentElement.parentElement;
+    let parent;
+    let check;
+    if(event.parentElement.className ==='group_member_ele'){
+        parent =event.parentElement;
+        check = event.parentElement.children[2].children[0];
+        
+    }else if(event.className === 'group_member_ele'){
+        parent=event;
+        check = event.children[2].children[0];
+    }
+    check.checked = true;
+    check.parentElement.parentElement.children[1].children[0].innerText +=' is added'
+    console.log(check.checked)
+    setTimeout(()=>{
+        check.disabled =true
+        parent.style.transform ='translatex(150%)'  
+    },3000)
+
+    await update_group_in_backend(key,check.id)
+
+        
+}
+
+
 
 async function update_group_in_backend(key, userId){
     const token = localStorage.getItem('token');

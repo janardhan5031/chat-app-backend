@@ -1,4 +1,3 @@
-
 body{
     margin: 0;
     padding: 0;
@@ -279,6 +278,8 @@ button{
     padding: 0 2rem;
     height: 100%;
 }
+
+/* left container */
 .add_group_members_container{
     position: absolute;
     right: 0px;
@@ -296,6 +297,17 @@ button{
 .add_group_members_container.active{
     display: flex;
 }
+.add_new_member_container, .remove_member_container, .add_admin_container, .remove_admin_container{
+    display: none;
+    flex-direction: column;
+}
+.add_new_member_container.active,
+.remove_member_container.active,
+.add_admin_container.active,
+.remove_admin_container.active{
+    display: flex;
+}
+
 .group_member_ele{
     height: 2.8rem;
     width: 90%;
